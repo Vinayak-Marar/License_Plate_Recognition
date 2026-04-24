@@ -1390,7 +1390,7 @@ class ModelConfigWidget(QWidget):
         yolo_lbl = QLabel("YOLO MODEL")
         yolo_lbl.setObjectName("section_label")
         yolo_lbl.setMinimumWidth(120)
-        self.yolo_edit = QLineEdit("models/best_of_both.engine")
+        self.yolo_edit = QLineEdit("weights/best_of_both.engine")
         self.yolo_edit.setStyleSheet(
             "background:#131b25;border:1px solid #243447;border-radius:4px;"
             "padding:7px;color:#c8d8e8;font-family:'Courier New';font-size:11px;")
@@ -1408,7 +1408,7 @@ class ModelConfigWidget(QWidget):
         ocr_lbl = QLabel("OCR MODEL")
         ocr_lbl.setObjectName("section_label")
         ocr_lbl.setMinimumWidth(120)
-        self.ocr_edit = QLineEdit("models/license_plate_detection_dynamic.engine")
+        self.ocr_edit = QLineEdit("weights/license_plate_regonition.engine")
         self.ocr_edit.setStyleSheet(self.yolo_edit.styleSheet())
         ocr_browse = QPushButton("···")
         ocr_browse.setMaximumWidth(40)

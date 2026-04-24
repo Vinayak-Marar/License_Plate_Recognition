@@ -24,7 +24,7 @@ from util import (
 )
 
 # ================= CONFIG =================
-MODEL_PATH         = "models/best_of_both.engine"
+MODEL_PATH         = "weights/best_of_both.engine"
 
 
 
