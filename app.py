@@ -126,7 +126,7 @@ class _PTHBackend:
         from model.GeneralizedLPRNet import GeneralizedLPRNet
         self._dev = torch.device(DEVICE)
         m = GeneralizedLPRNet(num_classes=len(CHARS) + 1)
-        state = torch.load(path, map_location=self._dev)
+        state = torch.load(path, map_location=self._dev,weights_only=True)
         if isinstance(state, dict) and "model" in state:
             state = state["model"]
         m.load_state_dict(state)
