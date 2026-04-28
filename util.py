@@ -28,7 +28,7 @@ def license_complies_format(text):
         return bool(re.match(r'^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$', text))
     if length == 11:
         return bool(re.match(r'^[A-Z]{2}[0-9]{2}[A-Z]{3}[0-9]{4}$', text))
-
+    # print(text)
     return False
 
 def format_license(text):
@@ -37,6 +37,8 @@ def format_license(text):
 
     if length == 10:
         alpha_indices, num_indices = [0, 1, 4, 5], [2, 3, 6, 7, 8, 9]
+    elif length == 9:
+        alpha_indices, num_indices = [0, 1, 4], [2, 3, 5, 6, 7, 8]
     else:
         return False
 
@@ -125,7 +127,7 @@ def batch_read_license_plates(crops, lpr_model):
             max_indices[batch_idx].cpu(),
             BLANK_IDX
         )
-        # print("text",text)
+  
         outputs[orig_idx] = (format_license(text), conf)
 
     return outputs
@@ -136,15 +138,76 @@ def read_license_plate(crop, lpr_model):
 
 def draw_box(frame, box, conf, plate_text, color='r'):
     x1, y1, x2, y2 = map(int, box)
-    if color == 'g':
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(frame, str(plate_text), (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-    if color == 'r':
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        cv2.putText(frame, str(plate_text), (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+    box_h = max(1, y2 - y1)
+    box_w = max(1, x2 - x1)
+
+    # Colors
     if color == 'b':
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
-        cv2.putText(frame, str(plate_text), (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
+        c = (255, 255, 0)   # blue
+    elif color == 'r':
+        c = (0, 165, 255)   # red
+    else:
+        c = (0, 255, 0)   # green
+
+    # Draw rectangle
+    cv2.rectangle(frame, (x1, y1), (x2, y2), c, 2)
+
+    if not plate_text:
+        return
+
+    label = f"{plate_text}"
+
+    # Different defaults for plate vs vehicle labels
+    if color == 'b':
+        font_scale = min(1.0, max(0.45, box_h / 70.0))
+    else:
+        font_scale = min(0.85, max(0.40, box_h / 110.0))
+
+    thickness = max(1, int(round(font_scale * 2)))
+
+    # Shrink text until it fits the box width reasonably well
+    max_text_width = max(40, box_w - 8)
+    while True:
+        (tw, th), baseline = cv2.getTextSize(
+            label,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            font_scale,
+            thickness
+        )
+        if tw <= max_text_width or font_scale <= 0.35:
+            break
+        font_scale *= 0.90
+        thickness = max(1, int(round(font_scale * 2)))
+
+    # Put label above the box if there is space, otherwise inside the top
+    pad = 4
+    if y1 - th - baseline - 2 * pad > 0:
+        text_y = y1 - 6
+        bg_top = text_y - th - baseline - pad
+        bg_bottom = text_y + baseline + pad
+    else:
+        text_y = y1 + th + pad
+        bg_top = y1
+        bg_bottom = y1 + th + baseline + 2 * pad
+
+    bg_left = x1
+    bg_right = min(frame.shape[1] - 1, x1 + tw + 2 * pad)
+
+    # Background
+    cv2.rectangle(frame, (bg_left, max(0, bg_top)), (bg_right, min(frame.shape[0] - 1, bg_bottom)), c, -1)
+
+    # Text
+    cv2.putText(
+        frame,
+        label,
+        (bg_left + pad, min(frame.shape[0] - 1, text_y)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale,
+        (0, 0, 0),
+        thickness,
+        cv2.LINE_AA
+    )
 
 def draw_quit_hint(frame, text="Quit (Q)"):
     h, w = frame.shape[:2]
