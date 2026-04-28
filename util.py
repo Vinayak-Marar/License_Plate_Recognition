@@ -142,11 +142,10 @@ def draw_box(frame, box, conf, plate_text, color='r'):
     box_h = max(1, y2 - y1)
     box_w = max(1, x2 - x1)
 
-    # Colors
     if color == 'b':
-        c = (255, 255, 0)   # blue
+        c = (255, 255, 0)   # blue/=
     elif color == 'r':
-        c = (0, 165, 255)   # red
+        c = (0, 165, 255)   # red/cyan
     else:
         c = (0, 255, 0)   # green
 
@@ -166,7 +165,7 @@ def draw_box(frame, box, conf, plate_text, color='r'):
 
     thickness = max(1, int(round(font_scale * 2)))
 
-    # Shrink text until it fits the box width reasonably well
+
     max_text_width = max(40, box_w - 8)
     while True:
         (tw, th), baseline = cv2.getTextSize(
@@ -180,7 +179,6 @@ def draw_box(frame, box, conf, plate_text, color='r'):
         font_scale *= 0.90
         thickness = max(1, int(round(font_scale * 2)))
 
-    # Put label above the box if there is space, otherwise inside the top
     pad = 4
     if y1 - th - baseline - 2 * pad > 0:
         text_y = y1 - 6
@@ -291,7 +289,6 @@ def ocr_plate(plate_crop, lprnet):
     return out, 0.0
 
 def match_plate_to_vehicle(plate_box, vehicles):
-    # DSA: Point-in-box check is O(1) compared to IoU O(N)
     pcx, pcy = (plate_box[0] + plate_box[2]) // 2, (plate_box[1] + plate_box[3]) // 2
     
     best_match = None

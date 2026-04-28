@@ -626,7 +626,7 @@ class ImageTab(QWidget):
     def save_result(self):
         if self._ann is None:
             return
-        # ── CHANGED: default save location is the save/ folder ──
+
         project_root = os.path.dirname(os.path.abspath(__file__))
         save_dir = os.path.join(project_root, "save")
         os.makedirs(save_dir, exist_ok=True)
@@ -912,7 +912,6 @@ class RealtimeTab(QWidget):
         if self.src is None:
             return
 
-        # ── CHANGED: save CSV to the save/ folder ──
         project_root = os.path.dirname(os.path.abspath(__file__))
         save_dir = os.path.join(project_root, "save")
         os.makedirs(save_dir, exist_ok=True)
